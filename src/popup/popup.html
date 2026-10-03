@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Polymarket Decimal Odds</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header class="header">
+        <img src="../../icons/icon-48.png" alt="" width="36" height="36" />
+        <div>
+          <h1>Decimal Odds</h1>
+          <p>para Polymarket</p>
+        </div>
+        <span class="version" id="version">v1.1.0</span>
+      </header>
+
+      <section class="status" aria-live="polite">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">Carregando…</span>
+      </section>
+
+      <section class="settings" aria-label="Preferências">
+        <label class="setting" for="enabled">
+          <span>
+            <strong>Ativar odds</strong>
+            <small>Exibir conversões nos mercados</small>
+          </span>
+          <input id="enabled" type="checkbox" role="switch" />
+        </label>
+
+        <label class="setting" for="show-inline-odds">
+          <span>
+            <strong>Ao lado do preço</strong>
+            <small>Manter preço original visível</small>
+          </span>
+          <input id="show-inline-odds" type="checkbox" role="switch" />
+        </label>
+        <label class="setting" for="currency-enabled">
+          <span>
+            <strong>Converter para reais</strong>
+            <small>Mostrar estimativa USD → BRL</small>
+          </span>
+          <input id="currency-enabled" type="checkbox" role="switch" />
+        </label>
+      </section>
+
+      <section class="exchange-rate" aria-live="polite">
+        <div>
+          <strong>Cotação USD/BRL</strong>
+          <p id="rate-value">Consultando cotação…</p>
+          <small id="rate-updated"></small>
+        </div>
+        <button id="refresh-rate" type="button">Atualizar</button>
+        <small class="rate-note" id="rate-note">Valores estimados; podem não incluir tarifas, spread ou impostos.</small>
+      </section>
+
+      <section class="formula">
+        <strong>Conversões</strong>
+        <p>Odd decimal = 1 ÷ preço da cota</p>
+        <small>Exemplo: US$ 0,36 → 2,78. O valor não representa uma probabilidade justa nem garante retorno.</small>
+        <p>Real estimado = valor em USD × cotação USD/BRL</p>
+      </section>
+
+      <p class="footer">Extensão independente, sem afiliação oficial à Polymarket.</p>
+      <p class="error" id="error" role="alert" hidden>Não foi possível salvar a preferência.</p>
+    </main>
+    <script src="../../src/shared/constants.js"></script>
+    <script src="../content/currency-converter.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
