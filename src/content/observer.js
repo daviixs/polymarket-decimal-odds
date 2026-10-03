@@ -153,7 +153,9 @@
       }
       if (node.nodeType !== 1) return;
       removeCurrencySource(node);
+      if (node.matches(candidateSelector)) extension.removeOdds(node);
       node.querySelectorAll("input, button, a, [role='button']").forEach(removeCurrencySource);
+      node.querySelectorAll(candidateSelector).forEach(extension.removeOdds);
       const walker = document.createTreeWalker(node, document.defaultView.NodeFilter.SHOW_TEXT);
       while (walker.nextNode()) removeCurrencySource(walker.currentNode);
     }

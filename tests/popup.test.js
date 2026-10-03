@@ -12,7 +12,7 @@ test("loads persisted settings and saves user changes", async () => {
   const writes = [];
   const dom = new JSDOM(html, { runScripts: "outside-only", url: "chrome-extension://test/src/popup/popup.html" });
   dom.window.chrome = {
-    runtime: { getManifest: () => ({ version: "1.1.0" }), sendMessage: async () => ({ ok: true }) },
+    runtime: { getManifest: () => ({ version: "1.1.1" }), sendMessage: async () => ({ ok: true }) },
     storage: { sync: {
       get: async (keys) => Object.fromEntries(keys.map((key) => [key, values[key]])),
       set: async (update) => { writes.push(update); Object.assign(values, update); },
@@ -30,7 +30,7 @@ test("loads persisted settings and saves user changes", async () => {
   assert.equal(inline.checked, true);
   assert.equal(currency.checked, false);
   assert.equal(dom.window.document.getElementById("status-text").textContent, "Conversões desativadas");
-  assert.equal(dom.window.document.getElementById("version").textContent, "v1.1.0");
+  assert.equal(dom.window.document.getElementById("version").textContent, "v1.1.1");
 
   enabled.checked = true;
   enabled.dispatchEvent(new dom.window.Event("change"));

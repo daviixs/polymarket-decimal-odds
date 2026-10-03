@@ -67,12 +67,26 @@ async function createCurrencyPage(html = "<button>Brasil $0.36</button>") {
 test("updates a changed price without duplicating the badge", async () => {
   const { dom, controller } = await createPage();
   const button = dom.window.document.querySelector("button");
-  assert.equal(button.querySelector("[data-pmo-odds]")?.textContent, "Odd 2,78");
+  assert.equal(dom.window.document.querySelector("[data-pmo-odds]")?.textContent, "Odd 2,78");
 
   button.firstChild.textContent = "Brasil 50%";
   await new Promise((resolve) => dom.window.requestAnimationFrame(() => resolve()));
-  assert.equal(button.querySelectorAll("[data-pmo-odds]").length, 1);
-  assert.equal(button.querySelector("[data-pmo-odds]")?.textContent, "Odd 2,00");
+  assert.equal(dom.window.document.querySelectorAll("[data-pmo-odds]").length, 1);
+  assert.equal(dom.window.document.querySelector("[data-pmo-odds]")?.textContent, "Odd 2,00");
+
+  controller.disconnect();
+  dom.window.close();
+});
+
+test("renders odds beside the outcome control without changing its content", async () => {
+  const { dom, controller } = await createPage();
+  const button = dom.window.document.querySelector("button");
+  const badge = dom.window.document.querySelector("[data-pmo-odds]");
+
+  assert.equal(button.querySelector("[data-pmo-odds]"), null);
+  assert.equal(button.textContent, "Brasil 36%");
+  assert.equal(badge.textContent, "Odd 2,78");
+  assert.equal(badge.previousElementSibling, button);
 
   controller.disconnect();
   dom.window.close();
@@ -87,6 +101,7 @@ test("removes inserted odds when disabled or when its source disappears", async 
   controller.updatePreferences({ enabled: true });
   await new Promise((resolve) => dom.window.requestAnimationFrame(() => resolve()));
   button.remove();
+  await new Promise((resolve) => dom.window.requestAnimationFrame(() => resolve()));
   assert.equal(dom.window.document.querySelector("[data-pmo-odds]"), null);
   controller.disconnect();
   dom.window.close();
@@ -97,14 +112,17 @@ test("adds and updates one BRL estimate beside the original USD amount", async (
   const button = dom.window.document.querySelector("button");
   let badge = dom.window.document.querySelector("[data-pmo-currency]");
   assert.equal(button.textContent.includes("$0.36"), true);
+  assert.equal(dom.window.document.querySelector("[data-pmo-odds]")?.textContent, "Odd 2,78");
   assert.equal(badge.textContent, " · R$ 1,93");
   assert.equal(badge.previousSibling, button);
+  assert.equal(badge.nextElementSibling?.getAttribute("data-pmo-odds"), "");
 
   button.firstChild.textContent = "Brasil $0.50";
   await new Promise((resolve) => dom.window.requestAnimationFrame(() => resolve()));
   badge = dom.window.document.querySelector("[data-pmo-currency]");
   assert.equal(badge.textContent, " · R$ 2,68");
   assert.equal(dom.window.document.querySelectorAll("[data-pmo-currency]").length, 1);
+  assert.equal(dom.window.document.querySelectorAll("[data-pmo-odds]").length, 1);
 
   controller.disconnect();
   dom.window.close();
@@ -116,7 +134,7 @@ test("keeps odds independent, leaves inputs alone, and hides BRL for a stale rat
   );
   const button = dom.window.document.querySelector("button");
   const input = dom.window.document.querySelector("input");
-  assert.equal(button.querySelector("[data-pmo-odds]")?.textContent, "Odd 2,78");
+  assert.equal(dom.window.document.querySelector("[data-pmo-odds]")?.textContent, "Odd 2,78");
   assert.equal(dom.window.document.querySelector("[data-pmo-currency]")?.textContent, " · R$ 53,50");
   assert.equal(input.value, "10.00");
 
@@ -138,11 +156,11 @@ test("keeps odds independent, leaves inputs alone, and hides BRL for a stale rat
 
   controller.updatePreferences({ currencyEnabled: false });
   assert.equal(dom.window.document.querySelector("[data-pmo-currency]"), null);
-  assert.ok(button.querySelector("[data-pmo-odds]"));
+  assert.ok(dom.window.document.querySelector("[data-pmo-odds]"));
   controller.updatePreferences({ currencyEnabled: true });
   controller.updateCurrencyRate({ rate: 5.35, rateDate: "2020-01-01", fetchedAt: new Date().toISOString() });
   assert.equal(dom.window.document.querySelector("[data-pmo-currency]"), null);
-  assert.ok(button.querySelector("[data-pmo-odds]"));
+  assert.ok(dom.window.document.querySelector("[data-pmo-odds]"));
   assert.equal(input.value, "10.00");
   controller.disconnect();
   dom.window.close();

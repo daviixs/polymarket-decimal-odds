@@ -40,6 +40,10 @@ test("updates one existing badge and does not duplicate it", () => {
   extension.renderOdds(button, 0.36, "pt-BR");
   extension.renderOdds(button, 0.5, "pt-BR");
 
-  assert.equal(button.querySelectorAll(`[${extension.oddsAttribute}]`).length, 1);
-  assert.equal(button.querySelector(`[${extension.oddsAttribute}]`).textContent, "Odd 2,00");
+  const badge = dom.window.document.querySelector(`[${extension.oddsAttribute}]`);
+  assert.equal(button.querySelectorAll(`[${extension.oddsAttribute}]`).length, 0);
+  assert.equal(dom.window.document.querySelectorAll(`[${extension.oddsAttribute}]`).length, 1);
+  assert.equal(badge.textContent, "Odd 2,00");
+  assert.equal(badge.previousElementSibling, button);
+  assert.equal(button.textContent, "Brasil 36%");
 });
