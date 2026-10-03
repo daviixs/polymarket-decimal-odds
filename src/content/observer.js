@@ -66,23 +66,6 @@
       return clone.textContent?.replace(/\s+/g, " ").trim() ?? "";
     }
 
-    function getInputAmount(input) {
-      if (!input.isConnected || !["number", "text", "tel"].includes(input.type)) return null;
-      const labels = [
-        input.getAttribute("aria-label"),
-        input.getAttribute("placeholder"),
-        input.getAttribute("title"),
-        ...Array.from(input.labels ?? [], (label) => label.textContent),
-      ];
-      const wrapper = input.parentElement;
-      const wrapperIsScoped = wrapper
-        && !["BODY", "HTML", "FORM"].includes(wrapper.tagName)
-        && wrapper.querySelectorAll("input, textarea, select").length === 1;
-      const wrapperText = wrapperIsScoped ? getElementTextWithoutAnnotations(wrapper).replace(input.value, " ") : "";
-      if (![...labels, wrapperText].some(extension.hasExplicitUsdMarker)) return null;
-      return extension.parseInputAmount(input.value);
-    }
-
     function processCurrencySource(source) {
       if (!source?.isConnected) return;
       if (!preferences.currencyEnabled || !extension.isCurrencyRateFresh(currencyRate)) {
@@ -93,16 +76,6 @@
       if (source.nodeType === 3) {
         const amount = extension.getSingleUsdAmount(source.nodeValue);
         if (amount === null || !source.parentElement) {
-          removeCurrencySource(source);
-          return;
-        }
-        placeCurrencyOutput(source, source, amount);
-        return;
-      }
-
-      if (source.matches?.("input")) {
-        const amount = getInputAmount(source);
-        if (amount === null) {
           removeCurrencySource(source);
           return;
         }
@@ -127,8 +100,6 @@
 
       if (node.matches(candidateSelector)) pendingCurrencySources.add(node);
       node.querySelectorAll(candidateSelector).forEach((control) => pendingCurrencySources.add(control));
-      node.querySelectorAll("input").forEach((input) => pendingCurrencySources.add(input));
-
       const walker = document.createTreeWalker(node, document.defaultView.NodeFilter.SHOW_TEXT);
       while (walker.nextNode()) queueCurrencySource(walker.currentNode);
     }
@@ -142,8 +113,6 @@
       } else if (node.nodeType === 3) {
         pendingCurrencySources.add(node);
       }
-      const label = element?.closest("label");
-      if (label?.control?.matches("input")) pendingCurrencySources.add(label.control);
     }
 
     function removeSourcesWithin(node) {
@@ -222,10 +191,7 @@
           });
         } else if (record.type === "characterData") {
           queueCurrencySource(record.target);
-        } else if (record.type === "attributes") {
-          if (record.target.matches?.("input")) pendingCurrencySources.add(record.target);
-          else queueCurrencySource(record.target);
-        }
+        } else if (record.type === "attributes") queueCurrencySource(record.target);
       }
       scheduleProcessing();
     }
@@ -244,15 +210,6 @@
       attributes: true,
       attributeFilter: ["aria-label", "title", "placeholder"],
     });
-
-    const handleInput = (event) => {
-      if (event.target instanceof document.defaultView.HTMLInputElement) {
-        pendingCurrencySources.add(event.target);
-        scheduleProcessing();
-      }
-    };
-    document.addEventListener("input", handleInput, true);
-    document.addEventListener("change", handleInput, true);
 
     scheduleCurrencyExpiry();
     scanDocument();
@@ -284,8 +241,6 @@
       disconnect() {
         observer.disconnect();
         if (currencyExpiryTimer !== null) document.defaultView.clearTimeout(currencyExpiryTimer);
-        document.removeEventListener("input", handleInput, true);
-        document.removeEventListener("change", handleInput, true);
         pendingCandidates.clear();
         pendingCurrencySources.clear();
       },

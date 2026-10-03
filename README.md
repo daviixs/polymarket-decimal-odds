@@ -21,7 +21,7 @@ A extensão usa a API pública [Frankfurter](https://frankfurter.dev/), no endpo
 
 O service worker busca a taxa ao iniciar e agenda consultas a cada 24 horas. O botão do popup solicita uma atualização manual, limitada a uma tentativa a cada 15 minutos. Se a rede ou a API falhar, a extensão conserva a última taxa válida, informa quando ela foi consultada e oculta a conversão na página quando a data da taxa ultrapassa quatro dias. Sem taxa válida, nenhum valor em reais é exibido.
 
-Somente valores que apresentem um marcador monetário explícito — como `$10.00`, `US$ 10`, `USD 10` ou `36¢` — são considerados. Valores numéricos em campos são convertidos apenas quando o próprio campo ou seu rótulo associado identifica USD. Percentuais, odds, quantidades, identificadores e números sem contexto monetário não são convertidos.
+Somente valores estáticos que apresentem um marcador monetário explícito — como `$10.00`, `US$ 10`, `USD 10` ou `36¢` — são considerados. Campos editáveis de investimento são deixados intactos para evitar alterar o layout ou a interação de negociação. Percentuais, odds, quantidades, identificadores e números sem contexto monetário não são convertidos.
 
 ## Tecnologias e estrutura
 
@@ -57,7 +57,7 @@ Os testes cobrem conversão e formatação, entradas monetárias ambíguas, taxa
 
 ## Limitações e depuração
 
-A extração é conservadora: se o valor não tiver marcador de USD ou se o campo numérico não estiver associado a um rótulo que identifique USD, a extensão não mostra conversão. Mudanças na estrutura da Polymarket podem exigir ajustes no extrator.
+A extração é conservadora: se o valor estático não tiver marcador de USD, a extensão não mostra conversão. Campos editáveis de investimento não recebem etiqueta BRL. Mudanças na estrutura da Polymarket podem exigir ajustes no extrator.
 
 A integração ainda não foi validada na interface ativa do Chrome. Os testes automatizados usam fixtures DOM e não comprovam a associação em todos os cards, eventos esportivos, mercados de múltiplas opções ou formulários reais da Polymarket. Para depurar, confirme a URL, verifique se a conversão está ativada, inspecione o texto e os rótulos acessíveis do componente e confira se o preço aparece em um dos formatos suportados. A taxa e a hora da consulta ficam visíveis no popup.
 
